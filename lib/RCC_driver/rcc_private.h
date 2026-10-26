@@ -34,6 +34,7 @@ typedef struct
     uint32_t RESERVED7;
     uint32_t RCC_DCKCFGR;
 }RCC_REGS_t;
+
 #define RCC_REGS (*(volatile RCC_REGS_t*)(0x40023800))
 
 //bits defines in TCC_CR
@@ -63,6 +64,8 @@ typedef struct
 #define PLLN 6
 #define PLLQ 24
 #define PLLP 16
-//
-
+//BITS DEFINE IN RCC_CSR
+#define RMVF   24
+//private functons
+static int64_t RCC_GetPLLFreq();
 #endif /* RCC_PRIVATE_H */

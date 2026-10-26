@@ -1,6 +1,6 @@
 #ifndef RCC_H
 #define RCC_H
-
+#include <stdint.h>
 /* User interface*/
 /*enums*/
 // Error status
@@ -14,6 +14,7 @@ typedef enum
     RCC_ERR_PLL_N_OUT_OF_RANGE,
     RCC_ERR_PLL_P_OUT_OF_RANGE,
     RCC_ERR_PLL_Q_OUT_OF_RANGE,
+    RCC_ERR_PLL_48_NOT_SET_TO_48,
     RCC_ERR_TIMEOUT
 } ERCCS_Err;
 // sysclck sources
@@ -27,7 +28,9 @@ typedef enum
 typedef enum
 {
     CLCK_SRC_DISABLED,
-    CLCK_SRC_ENABLED
+    CLCK_SRC_ENABLED,
+    CLCK_SRC_READY,
+    CLCK_SRC_NOT_READY
 } EClkSrcStatus;
 // HSE bypass ors not
 typedef enum
@@ -172,13 +175,26 @@ typedef enum
 {
     PERIPHERAL_ENABLED,
     PERIPHERAL_DISABLED
-} rss_enumPeripheralStatus_t;
+} rcc_enumPeripheralStatus_t;
+typedef enum
+{
+    BOR_RESET=25,
+    PIN_RESET,
+    POR_RESET,
+    SFT_RESET,
+    IWDG_RESET,
+    WWDG_RESET,
+    LPWR_RESET,
+} rcc_enumResteCause_t;
 
 /*public functions*/
 ERCCS_Err RCC_SelectSysClckSrc(ESysClkSrc);
 ERCCS_Err RCC_CntrlSysClckSrc(ESysClkSrc, ClckSrcCnfg_t);
 ERCCS_Err RCC_SetPLLConfig(PLLCnfg_t);
 ERCCS_Err RCC_SetBusPrescaler(EBusSelctor, union_BusPrescaler_t);
-ERCCS_Err RCC_CntrlPeripheralClck(rcc_enumPeripheralSelecotr_t, rss_enumPeripheralStatus_t);
-
+ERCCS_Err RCC_CntrlPeripheralClck(rcc_enumPeripheralSelecotr_t, rcc_enumPeripheralStatus_t);
+int64_t RCC_GetSysClkFreq();
+rcc_enumResteCause_t RCC_GetResetCause();
+EClkSrcStatus RCC_GetClckSrcStatus(ESysClkSrc);
+ESysClkSrc RCC_GetSystemClk(); 
 #endif /* RCC_H */
