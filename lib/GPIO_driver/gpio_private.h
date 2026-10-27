@@ -18,16 +18,15 @@ typedef struct
     uint32_t GPIOX_ODR;
     GPIO_BSRR_t GPIOX_BSRR;
     uint32_t GPIOX_LCKR;
-    uint32_t GPIOX_AFRL;
-    uint32_t GPIOX_AFRH;
+    uint64_t GPIOX_AFR;
 } GPIO_REGS_T;
 
 //_________________GPIO REGISTERS______________________
-#define GPIOA_REGS (*((volatile GPIO_REGS_T *)(0X40020000)))
-#define GPIOB_REGS (*((volatile GPIO_REGS_T *)(0X40020400)))
-#define GPIOC_REGS (*((volatile GPIO_REGS_T *)(0X40020800)))
-#define GPIOD_REGS (*((volatile GPIO_REGS_T *)(0X40020C00)))
-#define GPIOE_REGS (*((volatile GPIO_REGS_T *)(0X40021000)))
-#define GPIOH_REGS (*((volatile GPIO_REGS_T *)(0X40021C00)))
+#define GPIOA_REGS (*(volatile GPIO_REGS_T *)(0X40020000))
+#define GPIOB_REGS (*(volatile GPIO_REGS_T *)(0X40020400))
+#define GPIOC_REGS (*(volatile GPIO_REGS_T *)(0X40020800))
+#define GPIOD_REGS (*(volatile GPIO_REGS_T *)(0X40020C00))
+#define GPIOE_REGS (*(volatile GPIO_REGS_T *)(0X40021000))
+#define GPIOH_REGS (*(volatile GPIO_REGS_T *)(0X40021C00))
 
 #endif

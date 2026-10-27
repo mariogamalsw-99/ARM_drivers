@@ -1,7 +1,7 @@
 #include "rcc.h"
 #include "rcc_cfg.h"
 #include "rcc_private.h"
-#include "../../Helpers/bitwise_ops.h"
+#include "bitwise_ops.h"
 #include <stdio.h>
 #include <stdint.h>
 

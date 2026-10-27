@@ -67,6 +67,26 @@ typedef enum
     GPIO_DIGITAL_OUTPUT_LOW,
     GPIO_DIGITAL_OUTPUT_HIGH
 } GPIO_enuDigitalState_t;
+
+typedef enum
+{
+    GPIO_AF0,
+    GPIO_AF1,
+    GPIO_AF2,
+    GPIO_AF3,
+    GPIO_AF4,
+    GPIO_AF5,
+    GPIO_AF6,
+    GPIO_AF7,
+    GPIO_AF8,
+    GPIO_AF9,
+    GPIO_AF10,
+    GPIO_AF11,
+    GPIO_AF12,
+    GPIO_AF13,
+    GPIO_AF14,
+    GPIO_AF15
+} GPIO_enuAF_t;
 //________________________ERROR CODE ENUM_________________________________
 typedef enum
 {
@@ -74,6 +94,7 @@ typedef enum
     GPIO_OK,
     GPIO_ERR_UNDEFINED_VALUE,
 } GPIO_enuErrCode_t;
+
 //_______________________USER INTERFACE________________________________
 //____Pin level functions_____
 GPIO_enuErrCode_t GPIO_enuPinWrite(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuDigitalState_t cpy_enuState);
@@ -82,5 +103,5 @@ GPIO_enuErrCode_t GPIO_enuPinCfgMode(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t c
 GPIO_enuErrCode_t GPIO_enuPinCfgOutputType(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuOutputType_t cpy_enuOutType);
 GPIO_enuErrCode_t GPIO_enuPinCfgSpeed(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuOutputSpeed_t cpy_enuSpeed);
 GPIO_enuErrCode_t GPIO_enuPinCfgPUPD(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuPUPD_t cpy_enuPUPD);
-
+GPIO_enuErrCode_t GPIO_enuPinCfgAlternativeFunc(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuAF_t cpy_enuAlternativeFunction);                 
 #endif
