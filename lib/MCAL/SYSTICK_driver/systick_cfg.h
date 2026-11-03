@@ -1,0 +1,6 @@
+#ifndef SYSTICK_CFG_H
+#define SYSTICK_CFG_H
+
+#define AHB_FREQUANCY  16000000UL
+
+#endif
