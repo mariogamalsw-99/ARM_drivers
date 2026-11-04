@@ -14,5 +14,6 @@ typedef enum
 //_______________________USER INTERFACE________________________________
 void SysTick_Init();
 void SysTick_Delay(uint32_t ms);
+void SysTick_Delay_micro(uint32_t cpy_Delaymicors);
 
 #endif
