@@ -1,7 +1,8 @@
 #include "gpio.h"
 #include "gpio_cfg.h"
 #include "gpio_private.h"
-#include "bitwise_ops.h"
+#include "../../include/bitwise_ops.h"
+
 
 GPIO_enuErrCode_t GPIO_enuPinWrite(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuDigitalState_t cpy_enuState)
 {

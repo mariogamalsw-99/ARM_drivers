@@ -11,6 +11,71 @@ const HLED_Cnfg_t HLED_cfg[NUM_OF_LEDS] =
                 .outType=OUTPUT_STATE_OPEN_DRAIN,
                 .intialState=HLED_OFF,
                 .activeState=HLED_ACTIVE_LOW
+            },
+            [tst_led0]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN0,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led1]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN1,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led2]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN2,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led3]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN3,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led4]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN4,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led5]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN5,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led6]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN6,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
+            },
+            [tst_led7]={
+                .port=GPIO_PORT_B,
+                .pin=GPIO_PIN7,
+                .speed=GPIO_LOW_SPEED_OUTPUT,
+                .outType=OUTPUT_STATE_PUSH_PULL,
+                .intialState=HLED_OFF,
+                .activeState=HLED_ACTIVE_HIGH
             }
+            
         //**USER LEDS configuration code end here**//
 };
