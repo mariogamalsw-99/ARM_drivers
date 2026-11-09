@@ -10,8 +10,25 @@
 
 
 //_________________NVIC REGISTERS______________________
+#ifdef  PC_UNIT_TEST
+extern uint32_t  NVIC_ISER_ARR_testVar[8];
+extern uint32_t  NVIC_ICER_ARR_testVar[8];
+extern uint32_t  NVIC_ISPR_ARR_testVar[8];
+extern uint32_t  NVIC_ICPR_ARR_testVar[8];
+extern uint32_t  NVIC_IABR_ARR_testVar[8];
+extern uint32_t  NVIC_IPR_ARR_testVar[60];
+extern uint32_t  NVIC_STIR_testVar;
 
-#define NVIC_BASE_ADDRESS 0xdff
+#define NVIC_ISER_ARR (NVIC_ISER_ARR_testVar)
+#define NVIC_ICER_ARR (NVIC_ICER_ARR_testVar)
+#define NVIC_ISPR_ARR (NVIC_ISPR_ARR_testVar)
+#define NVIC_ICPR_ARR (NVIC_ICPR_ARR_testVar)
+#define NVIC_IABR_ARR (NVIC_IABR_ARR_testVar)
+#define NVIC_IPR_ARR (NVIC_IPR_ARR_testVar)
+#define NVIC_STIR (NVIC_STIR_testVar)
+#else
+
+#define NVIC_BASE_ADDRESS 0xE000E100
 #define NVIC_ISER_ARR ((volatile uint32_t *)(NVIC_BASE_ADDRESS+0x100))
 #define NVIC_ICER_ARR ((volatile uint32_t *)(NVIC_BASE_ADDRESS+0x180))
 #define NVIC_ISPR_ARR ((volatile uint32_t *)(NVIC_BASE_ADDRESS+0x200))
@@ -19,7 +36,7 @@
 #define NVIC_IABR_ARR ((volatile uint32_t *)(NVIC_BASE_ADDRESS+0x300))
 #define NVIC_IPR_ARR ((volatile uint32_t *)(NVIC_BASE_ADDRESS+0x400))
 #define NVIC_STIR (*(volatile uint32_t *)(NVIC_BASE_ADDRESS+0xE00))
-
+#endif
 //_________________NVIC Bits______________________
 
 
