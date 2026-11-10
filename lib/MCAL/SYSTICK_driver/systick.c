@@ -1,7 +1,7 @@
 #include "systick.h"
 #include "systick_cfg.h"
 #include "systick_private.h"
-#include "../../include/bitwise_ops.h"
+#include "bitwise_ops.h"
 
 static uint32_t Global_Static_RelodValue = 0;
 void SysTick_Init()

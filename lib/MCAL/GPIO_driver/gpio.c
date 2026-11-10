@@ -1,7 +1,7 @@
 #include "gpio.h"
 #include "gpio_cfg.h"
 #include "gpio_private.h"
-#include "../../include/bitwise_ops.h"
+#include "bitwise_ops.h"
 
 
 GPIO_enuErrCode_t GPIO_enuPinWrite(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t cpy_enuPin, GPIO_enuDigitalState_t cpy_enuState)
@@ -149,7 +149,7 @@ GPIO_enuErrCode_t GPIO_enuPinCfgMode(GPIO_enuPort_t cpy_enuPort, GPIO_enuPin_t c
         // Validate Pin
         if (cpy_enuPin >= GPIO_PIN0 && cpy_enuPin <= GPIO_PIN15)
         {
-            SET_BITS(&enuPortRegs->GPIOX_MODER, 2, (cpy_enuPin * 2), cpy_enumMode);
+            SET_BITS(&(enuPortRegs->GPIOX_MODER), 2, (cpy_enuPin * 2), cpy_enumMode);
         }
         else
         {
@@ -364,7 +364,7 @@ GPIO_enuErrCode_t GPIO_enuPinCfgAlternativeFunc(GPIO_enuPort_t cpy_enuPort, GPIO
         // Validate Pin
         if (cpy_enuPin >= GPIO_PIN0 && cpy_enuPin <= GPIO_PIN15)
         {
-            SET_BITS(&(enuPortRegs->GPIOX_AFR), 4, (cpy_enuPin * 4), cpy_enuAlternativeFunction);
+            SET_BITS64(&(enuPortRegs->GPIOX_AFR), 4, (cpy_enuPin * 4), cpy_enuAlternativeFunction);
         }
         else
         {

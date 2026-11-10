@@ -1,7 +1,7 @@
 #include "rcc.h"
 #include "rcc_cfg.h"
 #include "rcc_private.h"
-#include "../../include/bitwise_ops.h"
+#include "bitwise_ops.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -356,7 +356,7 @@ EClkSrcStatus RCC_GetClckSrcStatus(ESysClkSrc src)
 }
 ESysClkSrc RCC_GetSystemClk()
 {
-    ESysClkSrc ret = GET_BITS(RCC_REGS.RCC_CFGR, MASK_2BIT, 2);
+    ESysClkSrc ret = GET_BITS(&(RCC_REGS.RCC_CFGR), MASK_2BIT, 2);
     return ret;
 }
 
@@ -365,11 +365,11 @@ static int64_t RCC_GetPLLFreq()
 {
     int64_t pllfreq = -1;
     PLLCnfg_t myPllCnfg;
-    myPllCnfg.PLLSrc = GET_BITS(RCC_REGS.RCC_PLLCFGR, MASK_1BIT, 22);
-    myPllCnfg.PLLm = GET_BITS(RCC_REGS.RCC_PLLCFGR, MASK_6BIT, 0);
-    myPllCnfg.PLLn = GET_BITS(RCC_REGS.RCC_PLLCFGR, MASK_9BIT, 6);
-    myPllCnfg.PLLp = GET_BITS(RCC_REGS.RCC_PLLCFGR, MASK_2BIT, 16);
-    myPllCnfg.PLLq = GET_BITS(RCC_REGS.RCC_PLLCFGR, MASK_4BIT, 24);
+    myPllCnfg.PLLSrc = GET_BITS(&(RCC_REGS.RCC_PLLCFGR), MASK_1BIT, 22);
+    myPllCnfg.PLLm = GET_BITS(&(RCC_REGS.RCC_PLLCFGR), MASK_6BIT, 0);
+    myPllCnfg.PLLn = GET_BITS(&(RCC_REGS.RCC_PLLCFGR), MASK_9BIT, 6);
+    myPllCnfg.PLLp = GET_BITS(&(RCC_REGS.RCC_PLLCFGR), MASK_2BIT, 16);
+    myPllCnfg.PLLq = GET_BITS(&(RCC_REGS.RCC_PLLCFGR), MASK_4BIT, 24);
     switch (myPllCnfg.PLLSrc)
     {
     case PLL_HSE_SRC:

@@ -135,7 +135,7 @@ NVIC_enuErrCode_t NVIC_DisableIRQ(NVIC_enuIRQn_t IRQn);
  * Return true (IRQ-Number) if IRQn is
 pending
  */
-NVIC_enuErrCode_t NVIC_GetPendingIRQ(NVIC_enuIRQn_t IRQn);
+NVIC_enuErrCode_t NVIC_GetPendingIRQ(NVIC_enuIRQn_t cpy_enuIRQn, NVIC_enuPendingState_t *ref_enuPtrPendingState);
 /**
  * Set IRQn pending
  */
@@ -147,7 +147,7 @@ NVIC_enuErrCode_t NVIC_ClearPendingIRQ(NVIC_enuIRQn_t IRQn);
 /**
  * Return the IRQ number of the active interrupt
  */
-NVIC_enuErrCode_t NVIC_GetActive(NVIC_enuIRQn_t IRQn);
+NVIC_enuErrCode_t NVIC_GetActive(NVIC_enuIRQn_t cpy_enuIRQn, NVIC_enuActiveState_t *ref_enuPtrActiveState);
 /**
  * Set priority for IRQn
  */
@@ -155,10 +155,10 @@ NVIC_enuErrCode_t NVIC_SetPriority(NVIC_enuIRQn_t IRQn, uint32_t priority);
 /**
  * Read priority of IRQn
  */
-NVIC_enuErrCode_t NVIC_GetPriority(NVIC_enuIRQn_t IRQn);
+NVIC_enuErrCode_t NVIC_GetPriority(NVIC_enuIRQn_t cpy_enuIRQn, uint32_t *ref_ui32PtrPriority);
 /**
  * Reset the system
  */
-void NVIC_SystemReset(void);
+NVIC_enuErrCode_t NVIC_SystemReset(void);
 
 #endif

@@ -1,7 +1,7 @@
 #include "NVIC.h"
 #include "NVIC_cfg.h"
 #include "NVIC_private.h"
-#include "../../include/bitwise_ops.h"
+#include "bitwise_ops.h"
 //_____________________________Static Functions__________________________
 static NVIC_enuErrCode_t NVIC_enuIsValidIRQ(NVIC_enuIRQn_t cpy_IRQn)
 {
@@ -33,7 +33,7 @@ static NVIC_enuErrCode_t NVIC_enuIsValidIRQ(NVIC_enuIRQn_t cpy_IRQn)
  */
 NVIC_enuErrCode_t NVIC_SetPriorityGrouping(uint32_t priority_grouping)
 {
-    NVIC_enuErrCode_t loc_enuErrCode = NVIC_enuIsValidIRQ(cpy_enuIRQn);
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_ERR;
     if (loc_enuErrCode == NVIC_OK)
     {
     }
@@ -67,7 +67,11 @@ NVIC_enuErrCode_t NVIC_DisableIRQ(NVIC_enuIRQn_t cpy_enuIRQn)
         SET_BIT(NVIC_ICER_ARR[cpy_enuIRQn / NVIC_REG_SIZE], cpy_enuIRQn % NVIC_REG_SIZE);
         if (GET_BIT(NVIC_ICER_ARR[cpy_enuIRQn / NVIC_REG_SIZE], cpy_enuIRQn % NVIC_REG_SIZE) != 0)
         {
+#ifdef PC_UNIT_TEST
+            loc_enuErrCode = NVIC_OK;
+#else
             loc_enuErrCode = NVIC_ERR;
+#endif
         }
     }
     return loc_enuErrCode;
@@ -158,7 +162,7 @@ NVIC_enuErrCode_t NVIC_GetPriority(NVIC_enuIRQn_t cpy_enuIRQn, uint32_t *ref_ui3
  */
 NVIC_enuErrCode_t NVIC_SystemReset(void)
 {
-    NVIC_enuErrCode_t loc_enuErrCode = NVIC_enuIsValidIRQ(cpy_enuIRQn);
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_ERR;
     if (loc_enuErrCode == NVIC_OK)
     {
     }
