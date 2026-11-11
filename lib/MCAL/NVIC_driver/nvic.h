@@ -108,12 +108,24 @@ typedef enum
     NVIC_IRQ_IS_NOT_ACTIVE ,
     NVIC_IRQ_IS_ACTIVE ,
 }NVIC_enuActiveState_t;
+
+typedef enum
+{ 
+    NVIC_PRIORITY_GROUPING_NO_SUB_PRIORITIES=0,  
+    NVIC_PRIORITY_GROUPING_2_SUB_PRIORITIES=4,  
+    NVIC_PRIORITY_GROUPING_4_SUB_PRIORITIES,  
+    NVIC_PRIORITY_GROUPING_8_SUB_PRIORITIES,  
+    NVIC_PRIORITY_GROUPING_16_SUB_PRIORITIES,  
+
+}NVIC_enuPriortyGrouping_t;
+
 //________________________ERROR CODE ENUM_________________________________
 typedef enum
 {
     NVIC_ERR,
     NVIC_OK,
     NVIC_INVALID_IRQ_ERR,
+    SCB_INVALD_VTOR
 
 
 } NVIC_enuErrCode_t;
@@ -122,7 +134,7 @@ typedef enum
 /**
  * Set the priority grouping
  */
-NVIC_enuErrCode_t NVIC_SetPriorityGrouping(uint32_t priority_grouping);
+NVIC_enuErrCode_t NVIC_SetPriorityGrouping(NVIC_enuPriortyGrouping_t cpy_enuPriorityGrouping);
 /**
  * Enable IRQn
  */
@@ -160,5 +172,11 @@ NVIC_enuErrCode_t NVIC_GetPriority(NVIC_enuIRQn_t cpy_enuIRQn, uint32_t *ref_ui3
  * Reset the system
  */
 NVIC_enuErrCode_t NVIC_SystemReset(void);
+
+NVIC_enuErrCode_t NVIC_RequestSWInterrupt(NVIC_enuIRQn_t cpy_enuIRQn);
+NVIC_enuErrCode_t SCB_SetVectorTableOffset(uint32_t cpy_offset);
+
+
+
 
 #endif

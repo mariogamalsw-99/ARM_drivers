@@ -31,12 +31,13 @@ static NVIC_enuErrCode_t NVIC_enuIsValidIRQ(NVIC_enuIRQn_t cpy_IRQn)
 /**
  * Set the priority grouping
  */
-NVIC_enuErrCode_t NVIC_SetPriorityGrouping(uint32_t priority_grouping)
+NVIC_enuErrCode_t NVIC_SetPriorityGrouping(NVIC_enuPriortyGrouping_t cpy_enuPriorityGrouping)
 {
-    NVIC_enuErrCode_t loc_enuErrCode = NVIC_ERR;
-    if (loc_enuErrCode == NVIC_OK)
-    {
-    }
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_OK;
+
+    uint32_t loc_uint32AIRCRVal = 0;
+    loc_uint32AIRCRVal |= VECTKEY_MASK | (cpy_enuPriorityGrouping << 8);
+    SCB_AIRCR = loc_uint32AIRCRVal;
 
     return loc_enuErrCode;
 }
@@ -162,9 +163,38 @@ NVIC_enuErrCode_t NVIC_GetPriority(NVIC_enuIRQn_t cpy_enuIRQn, uint32_t *ref_ui3
  */
 NVIC_enuErrCode_t NVIC_SystemReset(void)
 {
-    NVIC_enuErrCode_t loc_enuErrCode = NVIC_ERR;
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_OK;
+    uint32_t loc_uint32AIRCRVal = 0;
+    loc_uint32AIRCRVal |= VECTKEY_MASK | (1 << SYSRESETREQ);
+    SCB_AIRCR = loc_uint32AIRCRVal;
+
+    return loc_enuErrCode;
+}
+
+NVIC_enuErrCode_t SCB_SetVectorTableOffset(uint32_t cpy_offset)
+{
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_OK;
+    uint32_t loc_uint32RegVal = cpy_offset;
+    if ((GET_BITS(&loc_uint32RegVal, MASK_8BIT, 0) != 0) && (GET_BITS(&loc_uint32RegVal, MASK_2BIT, 30) != 0))
+    {
+        loc_enuErrCode = SCB_INVALD_VTOR;
+    }
+    else
+    {
+        glob_uint32VTORValue = loc_uint32RegVal;
+        SCB_VTOR = loc_uint32RegVal;
+    }
+
+    return loc_enuErrCode;
+}
+
+NVIC_enuErrCode_t NVIC_RequestSWInterrupt(NVIC_enuIRQn_t cpy_enuIRQn)
+{
+    NVIC_enuErrCode_t loc_enuErrCode = NVIC_enuIsValidIRQ(cpy_enuIRQn);
     if (loc_enuErrCode == NVIC_OK)
     {
+        NVIC_ClearPendingIRQ(cpy_enuIRQn);
+        SET_BITS(&NVIC_STIR, 8, 0, cpy_enuIRQn);
     }
     return loc_enuErrCode;
 }
