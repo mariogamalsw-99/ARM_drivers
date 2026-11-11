@@ -4,6 +4,7 @@
 #include "../lib/MCAL/SYSTICK_driver/systick.h"
 #include "../lib/HAL/HLED/HLED.h"
 #include "bitwise_ops.h"
+#include "NVIC_driver/nvic.h"
 // #define Cport *((uint32_t *)(0x40020814UL))
 // register uint32_t myvar  asm("r7") ;
 // __attribute__ ((section(".mysection"),used)) volatile uint64_t blabla3 = 77;
@@ -43,13 +44,13 @@ PWM_LED PWM_LEDS[num_of_pwm_leds] = {
         .intens = 9,
         .state = HLED_ON,
         .blinktime = 0},
-    [Pwm_testled_1] = {.theLed = tst_led1, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_2] = {.theLed = tst_led2, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_3] = {.theLed = tst_led3, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_4] = {.theLed = tst_led4, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_5] = {.theLed = tst_led5, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_6] = {.theLed = tst_led6, .intens =9, .state = HLED_ON, .blinktime = 0},
-    [Pwm_testled_7] = {.theLed = tst_led7, .intens =9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_1] = {.theLed = tst_led1, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_2] = {.theLed = tst_led2, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_3] = {.theLed = tst_led3, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_4] = {.theLed = tst_led4, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_5] = {.theLed = tst_led5, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_6] = {.theLed = tst_led6, .intens = 9, .state = HLED_ON, .blinktime = 0},
+    [Pwm_testled_7] = {.theLed = tst_led7, .intens = 9, .state = HLED_ON, .blinktime = 0},
     [C13_LED] = {.theLed = Brake_LED, .intens = 5, .state = HLED_ON, .blinktime = 500},
 
 };
@@ -114,8 +115,113 @@ void changePWM()
     PWM_LEDS[glob_curr_select].intens %= 11;
 }
 
+void task1()
+{
+    static uint32_t tick = 0, i = 0;
+    static uint32_t pulsepos = 0;
+    tick++;
+    pulsepos = tick % 10;
+    for (i = 0; i < num_of_pwm_leds; i++)
+    {
+        // off every 5 ms
+        if (pulsepos == 0)
+        {
+            HLED_enuTurnOffLED(PWM_LEDS[i].theLed);
+        }
+        // on on the righ pwm
+        if (PWM_LEDS[i].state == HLED_ON)
+        {
+            if (pulsepos == PWM_LEDS[i].intens)
+            {
+                HLED_enuTurnOnLED(PWM_LEDS[i].theLed);
+            }
+        }
+        if (PWM_LEDS[i].blinktime > 0)
+        {
+            if (tick % (2 * PWM_LEDS[i].blinktime) == 0)
+            {
+                if (PWM_LEDS[i].state == HLED_ON)
+                {
+                    PWM_LEDS[i].state = HLED_OFF;
+                }
+                else
+                {
+                    PWM_LEDS[i].state = HLED_ON;
+                }
+            }
+        }
+    }
+
+    // each 200 ms ched switch
+    if (tick % 200 == 0)
+    {
+        glob_timeout++;
+        if (readSwitch(sw_select))
+        {
+            glob_timeout = 0;
+            switch (glob_mode)
+            {
+            case select_mode:
+                // next LED
+                nextLED();
+                break;
+            case normal_mode:
+                glob_mode = select_mode;
+                glob_curr_select = 7;
+                nextLED();
+                break;
+            }
+        }
+        if (readSwitch(sw_change))
+        {
+            if (glob_mode == select_mode)
+            {
+                glob_timeout = 0;
+                changePWM();
+            }
+        }
+        if (glob_timeout == 100)
+        {
+            glob_mode = normal_mode;
+            for (i = 0; i < num_of_pwm_leds; i++)
+            {
+                PWM_LEDS[i].blinktime = 0;
+                PWM_LEDS[i].state = HLED_ON;
+            }
+        }
+    }
+}
+volatile int x=0;
+void WWDG_IRQHandler()
+{
+    x++;
+    x+=5;
+}
 int main()
 {
+    NVIC_DisableIRQ(NVIC_IRQn_WWDG);
+    NVIC_EnableIRQ(NVIC_IRQn_WWDG);
+    NVIC_RequestSWInterrupt(NVIC_IRQn_WWDG);
+    NVIC_enuPendingState_t pState=NVIC_IRQ_IS_NOT_PENDING;
+    NVIC_SetPendingIRQ(NVIC_IRQn_WWDG);
+    NVIC_GetPendingIRQ(NVIC_IRQn_WWDG,&pState);
+    NVIC_ClearPendingIRQ(NVIC_IRQn_WWDG);
+    NVIC_GetPendingIRQ(NVIC_IRQn_WWDG,&pState);
+    NVIC_enuActiveState_t astate=NVIC_IRQ_IS_ACTIVE;
+    NVIC_GetActive(NVIC_IRQn_WWDG,&astate);
+    uint32_t p=4;
+    NVIC_SetPriority(NVIC_IRQn_WWDG,p);
+    NVIC_GetPriority(NVIC_IRQn_WWDG,&p);
+    NVIC_SetPriorityGrouping(NVIC_PRIORITY_GROUPING_8_SUB_PRIORITIES);
+    SCB_SetVectorTableOffset(0xff<<8 );
+    if(x==21)
+    {
+        NVIC_SystemReset();
+    }
+
+
+
+
     //     myvar=0x55;
     //     int* ptr = & blabla3;
     //     blabla3=55;
@@ -187,85 +293,13 @@ int main()
     GPIO_enuPinCfgPUPD(GPIO_PORT_B, GPIO_PIN15, PULL_DOWN);
 
     HLED_enuInitLED();
-    uint32_t tick = 0, i = 0;
-    uint32_t pulsepos = 0;
+    SysTick_setCallBack(task1);
+    SysTick_NotifyOnmicros(500);
+    SysTick_Start();
     while (1)
     {
 
-        tick++;
-        pulsepos = tick % 10;
-        for (i = 0; i < num_of_pwm_leds; i++)
-        {
-            // off every 5 ms
-            if (pulsepos == 0)
-            {
-                HLED_enuTurnOffLED(PWM_LEDS[i].theLed);
-            }
-            // on on the righ pwm
-            if (PWM_LEDS[i].state == HLED_ON)
-            {
-                if (pulsepos == PWM_LEDS[i].intens)
-                {
-                    HLED_enuTurnOnLED(PWM_LEDS[i].theLed);
-                }
-            }
-            if (PWM_LEDS[i].blinktime > 0)
-            {
-                if (tick % (2 * PWM_LEDS[i].blinktime) == 0)
-                {
-                    if (PWM_LEDS[i].state == HLED_ON)
-                    {
-                        PWM_LEDS[i].state = HLED_OFF;
-                    }
-                    else
-                    {
-                        PWM_LEDS[i].state = HLED_ON;
-                    }
-                }
-            }
-        }
-
-        // each 200 ms ched switch
-        if (tick % 200 == 0)
-        {
-            glob_timeout++;
-            if (readSwitch(sw_select))
-            {
-                glob_timeout = 0;
-                switch (glob_mode)
-                {
-                case select_mode:
-                    // next LED
-                    nextLED();
-                    break;
-                case normal_mode:
-                    glob_mode = select_mode;
-                    glob_curr_select = 7;
-                    nextLED();
-                    break;
-                }
-            }
-            if (readSwitch(sw_change))
-            {
-                if (glob_mode == select_mode)
-                {
-                    glob_timeout = 0;
-                    changePWM();
-                }
-            }
-            if (glob_timeout == 100)
-            {
-                glob_mode = normal_mode;
-                for (i = 0; i < num_of_pwm_leds; i++)
-                {
-                    PWM_LEDS[i].blinktime = 0;
-                    PWM_LEDS[i].state = HLED_ON;
-
-                }
-            }
-        }
-
-        SysTick_Delay_micro(500); // repeat every 0.5ms
+       // SysTick_Delay_micro(500); // repeat every 0.5ms
         // num = 0;
         // GPIO_enuPinRead(GPIO_PORT_B, 13, sw);
         // GPIO_enuPinRead(GPIO_PORT_B, 14, sw + 1);
