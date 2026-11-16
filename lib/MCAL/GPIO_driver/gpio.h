@@ -39,7 +39,8 @@ typedef enum
     GPIO_PORT_C,
     GPIO_PORT_D,
     GPIO_PORT_E,
-    GPIO_PORT_H
+    GPIO_PORT_H,
+    NUM_OF_PORTS
 } GPIO_enuPort_t;
 // PINS
 typedef enum
