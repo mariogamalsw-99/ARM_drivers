@@ -16,7 +16,7 @@ const HSwitch_Cnfg_t HSwitch_cfg[NUM_OF_SWITCHES] =
                 .pupd=PULL_DOWN,
                 .pressedState=HSWITCH_PRESSED_HIGH
             },
-            [Select_SW]={
+            [Down_SW]={
                 .port=GPIO_PORT_B,
                 .pin=GPIO_PIN15,
                 .pupd=PULL_DOWN,

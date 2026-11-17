@@ -5,6 +5,8 @@
 #include "../lib/HAL/HLED/HLED.h"
 #include "bitwise_ops.h"
 #include "NVIC_driver/nvic.h"
+#include "SCHED/SCHED.h"
+#include "HSwitch/HSwitch.h"
 // #define Cport *((uint32_t *)(0x40020814UL))
 // register uint32_t myvar  asm("r7") ;
 // __attribute__ ((section(".mysection"),used)) volatile uint64_t blabla3 = 77;
@@ -16,6 +18,8 @@
 // volatile uint8_t blabla7;
 // volatile uint64_t blabla;
 // volatile uint32_t blabla2;
+#define NO_ACTION_TIMEOUT 160 // 4sec 4000ms/25ms
+
 typedef struct main
 {
     HLED_LEDs_t theLed;
@@ -60,7 +64,7 @@ typedef enum
     sw_select,
     sw_change
 } switchs_t;
-uint32_t glob_timeout = 0;
+
 uint8_t glob_curr_select = 0;
 typedef enum
 {
@@ -106,16 +110,21 @@ void nextLED()
 
     glob_curr_select++;
     glob_curr_select %= 8;
-    PWM_LEDS[glob_curr_select].blinktime = 500;
+    PWM_LEDS[glob_curr_select].blinktime = 100;
 }
 
-void changePWM()
+void changeUpPWM()
 {
     PWM_LEDS[glob_curr_select].intens++;
     PWM_LEDS[glob_curr_select].intens %= 11;
 }
+void changeDownPWM()
+{
+    PWM_LEDS[glob_curr_select].intens += (11 - 1);
+    PWM_LEDS[glob_curr_select].intens %= 11;
+}
 
-void task1()
+void LED_Dimming_task()
 {
     static uint32_t tick = 0, i = 0;
     static uint32_t pulsepos = 0;
@@ -138,7 +147,7 @@ void task1()
         }
         if (PWM_LEDS[i].blinktime > 0)
         {
-            if (tick % (2 * PWM_LEDS[i].blinktime) == 0)
+            if (tick % (PWM_LEDS[i].blinktime) == 0)
             {
                 if (PWM_LEDS[i].state == HLED_ON)
                 {
@@ -151,155 +160,88 @@ void task1()
             }
         }
     }
-
-    // each 200 ms ched switch
-    if (tick % 200 == 0)
+}
+void switchesControl_task()
+{
+    static uint32_t loc_statTimeOut = 0;
+    if (loc_statTimeOut <= NO_ACTION_TIMEOUT)
     {
-        glob_timeout++;
-        if (readSwitch(sw_select))
+        loc_statTimeOut++;
+    }
+    HSwitch_State_t loc_enuSwState;
+    HSwitch_ErrorCode_t loc_enuSwtichErrcode = HSwitch_enuReadSwitch(Select_SW, &loc_enuSwState);
+    // if selecte pressed and this is new state
+    if (loc_enuSwState == HSwitch_PRESSED && loc_enuSwtichErrcode == HSwitch_OK_NEW_VAL)
+    {
+        loc_statTimeOut = 0;
+        switch (glob_mode)
         {
-            glob_timeout = 0;
-            switch (glob_mode)
-            {
-            case select_mode:
-                // next LED
-                nextLED();
-                break;
-            case normal_mode:
-                glob_mode = select_mode;
-                glob_curr_select = 7;
-                nextLED();
-                break;
-            }
+        case select_mode:
+            // next LED
+            nextLED();
+            break;
+        case normal_mode:
+            glob_mode = select_mode;
+            glob_curr_select = 7;
+            nextLED();
+            break;
         }
-        if (readSwitch(sw_change))
+    }
+    loc_enuSwtichErrcode = HSwitch_enuReadSwitch(Up_SW, &loc_enuSwState);
+    if (loc_enuSwState == HSwitch_PRESSED && loc_enuSwtichErrcode == HSwitch_OK_NEW_VAL)
+    {
+        if (glob_mode == select_mode)
         {
-            if (glob_mode == select_mode)
-            {
-                glob_timeout = 0;
-                changePWM();
-            }
+            loc_statTimeOut = 0;
+            changeUpPWM();
         }
-        if (glob_timeout == 100)
+    }
+    loc_enuSwtichErrcode = HSwitch_enuReadSwitch(Down_SW, &loc_enuSwState);
+    if (loc_enuSwState == HSwitch_PRESSED && loc_enuSwtichErrcode == HSwitch_OK_NEW_VAL)
+    {
+        if (glob_mode == select_mode)
         {
-            glob_mode = normal_mode;
-            for (i = 0; i < num_of_pwm_leds; i++)
-            {
-                PWM_LEDS[i].blinktime = 0;
-                PWM_LEDS[i].state = HLED_ON;
-            }
+            loc_statTimeOut = 0;
+            changeDownPWM();
+        }
+    }
+    if (loc_statTimeOut == NO_ACTION_TIMEOUT)
+    {
+        glob_mode = normal_mode;
+        for (int i = 0; i < num_of_pwm_leds-1; i++)
+        {
+            PWM_LEDS[i].blinktime = 0;
+            PWM_LEDS[i].state = HLED_ON;
         }
     }
 }
-volatile int x=0;
-void WWDG_IRQHandler()
-{
-    x++;
-    x+=5;
-}
+
 int main()
 {
-    NVIC_DisableIRQ(NVIC_IRQn_WWDG);
-    NVIC_EnableIRQ(NVIC_IRQn_WWDG);
-    NVIC_RequestSWInterrupt(NVIC_IRQn_WWDG);
-    NVIC_enuPendingState_t pState=NVIC_IRQ_IS_NOT_PENDING;
-    NVIC_SetPendingIRQ(NVIC_IRQn_WWDG);
-    NVIC_GetPendingIRQ(NVIC_IRQn_WWDG,&pState);
-    NVIC_ClearPendingIRQ(NVIC_IRQn_WWDG);
-    NVIC_GetPendingIRQ(NVIC_IRQn_WWDG,&pState);
-    NVIC_enuActiveState_t astate=NVIC_IRQ_IS_ACTIVE;
-    NVIC_GetActive(NVIC_IRQn_WWDG,&astate);
-    uint32_t p=4;
-    NVIC_SetPriority(NVIC_IRQn_WWDG,p);
-    NVIC_GetPriority(NVIC_IRQn_WWDG,&p);
-    NVIC_SetPriorityGrouping(NVIC_PRIORITY_GROUPING_8_SUB_PRIORITIES);
-    SCB_SetVectorTableOffset(0xff<<8 );
-    if(x==21)
-    {
-        NVIC_SystemReset();
-    }
-
-
-
-
-    //     myvar=0x55;
-    //     int* ptr = & blabla3;
-    //     blabla3=55;
-    //     printf("%d",&blabla3);
-    //  blabla3++;
-    //  blabla4++;
-    //  blabla5++;
-    //  blabla6++;
-    //  blabla7++;
-    //     printf("%d",blabla2);
-    //     blabla2++;
-    // ClckSrcCnfg_t myHseCnfg = {.status = CLCK_SRC_ENABLED, .bypass = CLK_HSE_BYPASS};
-    // RCC_CntrlSysClckSrc(SYSCLK_HSI_SRC, myHseCnfg);
-    // RCC_GetClckSrcStatus(SYSCLK_HSI_SRC);
-    // RCC_SelectSysClckSrc(SYSCLK_HSI_SRC);
-    // union_BusPrescaler_t myprescaler={.AHBPrescaler=BUS_AHB_NO_PRESCALER};
-    // RCC_SetBusPrescaler(AHB_BUS,myprescaler);
-    // PLLCnfg_t mypllcnfg = {
-    //     .PLLSrc = PLL_HSI_SRC,
-    //     .PLLm = 16,
-    //     .PLLn = 288,
-    //     .PLLp = PLL_P_4,  // sysclck72MHz
-    //     .PLLq = PLL_Q_6}; // PLL48MHz
-    // RCC_SetPLLConfig(mypllcnfg);
-    // RCC_CntrlPeripheralClck(PERIPHERAL_AHB1_GPIOC, PERIPHERAL_ENABLED);
-    // ClckSrcCnfg_t myPLLCnfg = {.status = CLCK_SRC_ENABLED, .bypass = CLK_HSE_BYPASS};
-    // RCC_CntrlSysClckSrc(SYSCLK_PLL_SRC, myPLLCnfg);
-    // RCC_GetClckSrcStatus(SYSCLK_PLL_SRC);
-    //  RCC_SelectSysClckSrc(SYSCLK_PLL_SRC);
-    // RCC_GetSysClkFreq();
-    // RCC_CntrlPeripheralClck(PERIPHERAL_AHB1_GPIOB, PERIPHERAL_ENABLED);
-    // RCC_CntrlPeripheralClck(PERIPHERAL_AHB1_GPIOC, PERIPHERAL_ENABLED);
-    // volatile GPIO_enuErrCode_t gpio_status;
-    // gpio_status = GPIO_enuPinCfgMode(GPIO_PORT_C, GPIO_PIN13, GPIO_DIGITAL_OUTPUT);
-    // gpio_status = GPIO_enuPinCfgOutputType(GPIO_PORT_C, 13, OUTPUT_STATE_PUSH_PULL);
-    // gpio_status = GPIO_enuPinCfgPUPD(GPIO_PORT_C, 13, NO_PULL_UP_PULL_DOWN);
-    // gpio_status = GPIO_enuPinCfgSpeed(GPIO_PORT_C, 13, GPIO_MADIUM_SPEED_OUTPUT);
-    // for (int i = 0; i < 8; i++)
-    // {
-    //     gpio_status = GPIO_enuPinCfgMode(GPIO_PORT_B, i, GPIO_DIGITAL_OUTPUT);
-    //     gpio_status = GPIO_enuPinCfgOutputType(GPIO_PORT_B, i, OUTPUT_STATE_PUSH_PULL);
-    //     gpio_status = GPIO_enuPinCfgPUPD(GPIO_PORT_B, i, NO_PULL_UP_PULL_DOWN);
-    //     gpio_status = GPIO_enuPinCfgSpeed(GPIO_PORT_B, i, GPIO_MADIUM_SPEED_OUTPUT);
-    // }
-    // // set B13-15 input
-    // for (int i = 13; i < 16; i++)
-    // {
-    //     gpio_status = GPIO_enuPinCfgMode(GPIO_PORT_B, i, GPIO_DIGITAL_INPUT);
-    //     gpio_status = GPIO_enuPinCfgOutputType(GPIO_PORT_B, i, OUTPUT_STATE_OPEN_DRAIN);
-    //     gpio_status = GPIO_enuPinCfgPUPD(GPIO_PORT_B, i, PULL_DOWN);
-    // }
-
-    // uint32_t x = 1;
-    // uint8_t num = 0;
-    // uint8_t sw[3] = {0};
-    // uint8_t sw_prev[3] = {0};
-    // uint8_t leds[3] = {0};
-    // uint8_t toggle = 1;
-    SysTick_Init();
-    RCC_CntrlPeripheralClck(PERIPHERAL_AHB1_GPIOC, PERIPHERAL_ENABLED);
-    RCC_CntrlPeripheralClck(PERIPHERAL_AHB1_GPIOB, PERIPHERAL_ENABLED);
-
-    GPIO_enuPinCfgMode(GPIO_PORT_B, GPIO_PIN13, GPIO_DIGITAL_INPUT);
-    GPIO_enuPinCfgOutputType(GPIO_PORT_B, GPIO_PIN13, OUTPUT_STATE_OPEN_DRAIN);
-    GPIO_enuPinCfgPUPD(GPIO_PORT_B, GPIO_PIN13, PULL_DOWN);
-
-    GPIO_enuPinCfgMode(GPIO_PORT_B, GPIO_PIN15, GPIO_DIGITAL_INPUT);
-    GPIO_enuPinCfgOutputType(GPIO_PORT_B, GPIO_PIN15, OUTPUT_STATE_OPEN_DRAIN);
-    GPIO_enuPinCfgPUPD(GPIO_PORT_B, GPIO_PIN15, PULL_DOWN);
-
     HLED_enuInitLED();
-    SysTick_setCallBack(task1);
-    SysTick_NotifyOnmicros(500);
-    SysTick_Start();
+    HSwitch_enuInitSwitches(1);
+    SCHED_init();
+    SCHED_Runnable_t LedsTask = {
+        .cyclicTimems = 1,
+        .delayms = 20,
+        .func = LED_Dimming_task,
+        .priority = 0};
+    SCHED_registerRunnable(&LedsTask);
+    SCHED_Runnable_t ControlSwitchesTask = {
+        .cyclicTimems = 25,
+        .delayms = 21,
+        .func = switchesControl_task,
+        .priority = 2};
+    SCHED_registerRunnable(&LedsTask);
+    SCHED_registerRunnable(&ControlSwitchesTask);
+    SCHED_start();
+    // SysTick_setCallBack(LED_Dimming_task);
+    // SysTick_NotifyOnmicros(500);
+    // SysTick_Start();
     while (1)
     {
 
-       // SysTick_Delay_micro(500); // repeat every 0.5ms
+        // SysTick_Delay_micro(500); // repeat every 0.5ms
         // num = 0;
         // GPIO_enuPinRead(GPIO_PORT_B, 13, sw);
         // GPIO_enuPinRead(GPIO_PORT_B, 14, sw + 1);

@@ -116,6 +116,7 @@ HSwitch_ErrorCode_t HSwitch_enuInitSwitches(uint8_t priority)
             }
         }
     }
+    
     for (int i = 0; i < NUM_OF_SWITCHES; i++)
     {
        GPIO_enuPinCfgMode(HSwitch_cfg[i].port,HSwitch_cfg[i].pin,GPIO_DIGITAL_INPUT);
