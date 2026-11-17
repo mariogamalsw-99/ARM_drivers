@@ -29,6 +29,7 @@ typedef enum
     HLED_ERR,
     HLED_OK,
     HLED_ERR_GPIO_ERR,
+    HLED_ERR_RCC_ERR,
     HLED_ERR_UNDEFIND_VALUE,
 
 }HLED_ErrorCode_t;
